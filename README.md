@@ -1,20 +1,104 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/85dacf60-7cc5-493f-b305-d444d6bb54ac
-
-## Run Locally
-
-**Prerequisites:**  Node.js
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+# SecAssistAI
+
+Enterprise AI-Powered Security Operations Center (SOC) Platform
+
+## Overview
+
+SecAssistAI is a modern cybersecurity operations platform designed to help security teams detect, investigate, and respond to threats through AI-assisted workflows.
+
+The platform combines:
+
+- Security Operations Center (SOC)
+- Threat Hunting
+- Incident Response
+- Threat Intelligence
+- Vulnerability Management
+- Governance Risk & Compliance (GRC)
+- Security Architecture Visualization
+- Autonomous AI Investigation
+
+---
+
+## Features
+
+### Security Operations
+
+- Real-time Security Monitoring
+- Alert Management
+- Incident Response Workflows
+- Threat Severity Scoring
+
+### AI Security Assistant
+
+- AI Threat Investigation Agent
+- Log Analysis
+- Executive Report Generation
+- Automated Recommendations
+
+### Threat Hunting
+
+- IOC Search
+- Timeline Reconstruction
+- Risk Correlation Engine
+
+### Vulnerability Management
+
+- CVE Tracking
+- Remediation Lifecycle
+- Patch Recommendations
+
+### Threat Intelligence
+
+- MITRE ATT&CK Mapping
+- Threat Intelligence Library
+- Knowledge Graph
+
+### Governance & Compliance
+
+- ISO 27001
+- NIST CSF
+- SOC 2
+- CIS Controls
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend
+
+- FastAPI
+- Python
+
+### Database
+
+- PostgreSQL
+
+### AI
+
+- Gemini
+
+---
+
+## Architecture
+
+SecAssistAI uses a multi-tier architecture:
+
+Frontend → API Layer → AI Services → PostgreSQL Database
+
+---
+
+
+## Future Enhancements
+
+- Threat Intelligence Feeds
+- Detection Engineering Lab
+- Global Threat Map
+- Advanced AI Investigation
