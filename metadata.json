@@ -1,0 +1,6 @@
+{
+  "name": "SecAssistAI",
+  "description": "Enterprise-grade AI Security Operations Center (SOC) Assistant providing real-time threat intelligence, automated security log analysis, MITRE ATT&CK mapping, and automated incident response remediation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
