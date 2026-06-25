@@ -859,6 +859,42 @@ function activateMockInterceptor() {
         return new Response(JSON.stringify({ error: "Vulnerability not found" }), { status: 404 });
       }
 
+      // GET /api/db-status (mock)
+      if (path === "/api/db-status" && method === "GET") {
+        return new Response(JSON.stringify({
+          isPostgres: false,
+          host: "GitHub Pages CDN / Local Storage Sandbox",
+          database: "sec_local_cache"
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
+      // POST /api/settings/reset-database (mock)
+      if (path === "/api/settings/reset-database" && method === "POST") {
+        if (!currentUser) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+        setStored("alerts", []);
+        setStored("assets", []);
+        setStored("vulnerabilities", []);
+        setStored("logs", []);
+        setStored("reports", []);
+        setStored("threats", []);
+        setStored("compliance", []);
+        return new Response(JSON.stringify({ status: "success" }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
+      // POST /api/settings/restore-defaults (mock)
+      if (path === "/api/settings/restore-defaults" && method === "POST") {
+        if (!currentUser) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+        localStorage.removeItem("sec_alerts");
+        localStorage.removeItem("sec_assets");
+        localStorage.removeItem("sec_vulnerabilities");
+        localStorage.removeItem("sec_logs");
+        localStorage.removeItem("sec_reports");
+        localStorage.removeItem("sec_threats");
+        localStorage.removeItem("sec_compliance");
+        localStorage.removeItem("sec_users");
+        return new Response(JSON.stringify({ status: "success" }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
       // 20. GET /api/knowledge-graph
       if (path === "/api/knowledge-graph" && method === "GET") {
         if (!currentUser) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });

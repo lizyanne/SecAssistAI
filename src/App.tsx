@@ -29,7 +29,8 @@ import {
   Lock,
   Cpu,
   Workflow,
-  ClipboardList
+  ClipboardList,
+  Settings
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -53,6 +54,7 @@ import SecurityKnowledgeGraph from "./components/SecurityKnowledgeGraph";
 import AiThreatAgent from "./components/AiThreatAgent";
 import SecurityArchitecture from "./components/SecurityArchitecture";
 import GrcCenter from "./components/GrcCenter";
+import SettingsView from "./components/SettingsView";
 import { MITRE_ATTACK_MATRIX, MitreTactic, MitreTechnique } from "./data/mitreData";
 
 export default function App() {
@@ -71,7 +73,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "alerts" | "logs" | "mitre" | "threats" | "reports" |
     "threat-hunting" | "assets" | "vulnerabilities" | "knowledge-graph" | "ai-agent" |
-    "security-architecture" | "grc-center"
+    "security-architecture" | "grc-center" | "settings"
   >("dashboard");
 
   // Domain states
@@ -1017,6 +1019,21 @@ export default function App() {
               <div className="flex items-center gap-2.5">
                 <ClipboardList size={18} className={activeTab === "grc-center" ? "text-[#00E5FF]" : "text-slate-400"} />
                 <span>GRC Compliance Center</span>
+              </div>
+              <ChevronRight size={14} className="opacity-50" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab("settings")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                activeTab === "settings"
+                  ? "bg-white/5 text-[#00E5FF] border border-[#00E5FF]/30 shadow-[0_0_15px_rgba(0,229,255,0.15)]"
+                  : "text-slate-400 hover:bg-white/[0.02] hover:text-slate-100 border border-transparent"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Settings size={18} className={activeTab === "settings" ? "text-[#00E5FF]" : "text-slate-400"} />
+                <span>Settings & Controls</span>
               </div>
               <ChevronRight size={14} className="opacity-50" />
             </button>
@@ -2340,6 +2357,18 @@ export default function App() {
                 <p className="text-sm text-slate-400 font-sans">Audit framework scorecards, mitigate logged corporate risk vectors, and compile Board-level compliance reports.</p>
               </div>
               <GrcCenter token={token} />
+            </div>
+          )}
+
+          {/* SYSTEM SETTINGS & CONTROLS VIEW */}
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <SettingsView 
+                token={token} 
+                currentUser={currentUser} 
+                setCurrentUser={setCurrentUser} 
+                addConsoleLog={addConsoleLog} 
+              />
             </div>
           )}
 

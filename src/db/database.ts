@@ -414,7 +414,7 @@ const initialFallbackDatabase = {
 
 export class DatabaseService {
   private static pool: Pool | null = null;
-  private static isPostgres = false;
+  public static isPostgres = false;
 
   public static async initialize(): Promise<void> {
     const hasPostgresVars = !!(
@@ -1490,5 +1490,44 @@ export class DatabaseService {
     db.mitre_mappings = db.mitre_mappings.filter((m) => m.id !== id);
     this.writeJsonDb(db);
     return db.mitre_mappings.length < originalLength;
+  }
+
+  public static async resetDatabase(): Promise<void> {
+    if (this.isPostgres && this.pool) {
+      await this.pool.query("DELETE FROM mitre_mappings");
+      await this.pool.query("DELETE FROM reports");
+      await this.pool.query("DELETE FROM audit_logs");
+      await this.pool.query("DELETE FROM vulnerabilities");
+      await this.pool.query("DELETE FROM assets");
+      await this.pool.query("DELETE FROM incidents");
+      await this.pool.query("DELETE FROM alerts");
+      await this.pool.query("DELETE FROM threat_intelligence");
+      await this.pool.query("DELETE FROM compliance_records");
+      return;
+    }
+    const db = this.readJsonDb();
+    db.alerts = [];
+    db.logs = [];
+    db.reports = [];
+    db.assets = [];
+    db.vulnerabilities = [];
+    db.compliance = [];
+    db.threats = [];
+    db.mitre_mappings = [];
+    db.incidents = [];
+    this.writeJsonDb(db);
+  }
+
+  public static async restoreDefaults(): Promise<void> {
+    if (this.isPostgres && this.pool) {
+      await this.resetDatabase();
+      const migrationFile = path.join(process.cwd(), "src", "db", "migrations.sql");
+      if (fs.existsSync(migrationFile)) {
+        const sql = fs.readFileSync(migrationFile, "utf-8");
+        await this.pool.query(sql);
+      }
+      return;
+    }
+    this.writeJsonDb(JSON.parse(JSON.stringify(initialFallbackDatabase)));
   }
 }

@@ -403,6 +403,64 @@ app.get("/api/auth/me", async (req, res) => {
   return res.json({ user });
 });
 
+// Fetch database status diagnostic
+app.get("/api/db-status", async (req, res) => {
+  const isPostgres = DatabaseService.isPostgres;
+  const dbUrl = process.env.DATABASE_URL || "";
+  let host = "Local File Sandbox";
+  let dbName = "db.json";
+  
+  if (isPostgres) {
+    if (dbUrl) {
+      try {
+        const urlObj = new URL(dbUrl);
+        host = urlObj.host;
+        dbName = urlObj.pathname.replace("/", "");
+      } catch (_) {
+        host = "PostgreSQL Server";
+        dbName = "secassist";
+      }
+    } else {
+      host = process.env.SQL_HOST || "127.0.0.1";
+      dbName = process.env.SQL_DB_NAME || "secassist";
+    }
+  }
+
+  return res.json({
+    isPostgres,
+    host,
+    database: dbName
+  });
+});
+
+// Reset database (wipe drafts)
+app.post("/api/settings/reset-database", async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: "Unauthorized." });
+  if (user.role === "Viewer") return res.status(403).json({ error: "Forbidden." });
+
+  try {
+    await DatabaseService.resetDatabase();
+    return res.json({ status: "success", message: "Database successfully cleared of draft alerts and logs." });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to reset database.", details: err.message });
+  }
+});
+
+// Restore default enterprise SOC templates
+app.post("/api/settings/restore-defaults", async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: "Unauthorized." });
+  if (user.role === "Viewer") return res.status(403).json({ error: "Forbidden." });
+
+  try {
+    await DatabaseService.restoreDefaults();
+    return res.json({ status: "success", message: "Database default enterprise templates restored." });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to restore defaults.", details: err.message });
+  }
+});
+
 // Dynamic statistics compiler for custom dashboard widgets
 app.get("/api/dashboard/stats", async (req, res) => {
   const user = await getAuthUser(req);
