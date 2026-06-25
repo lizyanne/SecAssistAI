@@ -438,6 +438,17 @@ export class DatabaseService {
 
       if (process.env.DATABASE_URL) {
         config.connectionString = process.env.DATABASE_URL;
+        // Supabase, Neon, Render, and other cloud databases require SSL
+        const lowerUrl = process.env.DATABASE_URL.toLowerCase();
+        if (
+          lowerUrl.includes("supabase") ||
+          lowerUrl.includes("neon") ||
+          lowerUrl.includes("render") ||
+          lowerUrl.includes("sslmode=require") ||
+          lowerUrl.includes("pooler")
+        ) {
+          config.ssl = { rejectUnauthorized: false };
+        }
       } else {
         config.host = process.env.SQL_HOST || process.env.PGHOST || "127.0.0.1";
         config.user = process.env.SQL_USER || process.env.PGUSER || "postgres";
