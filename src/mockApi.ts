@@ -403,6 +403,32 @@ function activateMockInterceptor() {
         }
       }
 
+      // POST /api/auth/register
+      if (path === "/api/auth/register" && method === "POST") {
+        const { name, email, role, tenantId } = body;
+        if (!email || !name) {
+          return new Response(JSON.stringify({ error: "Name and email are required." }), { status: 400 });
+        }
+        const users = getStored("users", DEFAULT_USERS);
+        const existingUser = users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+        if (existingUser) {
+          return new Response(JSON.stringify({ error: "Identity ID already registered." }), { status: 400 });
+        }
+        const newUser = {
+          id: `u-${Math.floor(100 + Math.random() * 900)}`,
+          name,
+          email,
+          role: role || "Analyst",
+          tenantId: tenantId || "tenant-alpha"
+        };
+        users.push(newUser);
+        setStored("users", users);
+        return new Response(JSON.stringify({
+          token: `mock-token-${newUser.email}`,
+          user: newUser
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
       // 2. GET /api/auth/me
       if (path === "/api/auth/me" && method === "GET") {
         if (!currentUser) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });

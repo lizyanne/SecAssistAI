@@ -22,3 +22,130 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Custom scrollbar utility for sleek dark UI */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.3);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* HIGH-CONTRAST LIGHT THEME STYLING ENGINE */
+.light-theme {
+  background-color: #f8fafc !important; /* slate-50 */
+  color: #1e293b !important; /* slate-800 */
+}
+
+/* Layout overrides */
+.light-theme header,
+.light-theme aside,
+.light-theme footer {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Card and container overrides */
+.light-theme .bg-white\/5,
+.light-theme .bg-white\/10,
+.light-theme .bg-\[\#0A0A0C\]\/80,
+.light-theme .bg-\[\#0A0A0C\]\/40,
+.light-theme .bg-\[\#0D0E12\],
+.light-theme .bg-\[\#050507\],
+.light-theme .bg-\[\#08080A\],
+.light-theme .bg-\[\#09090C\],
+.light-theme .bg-\[\#0C0C0E\]\/50,
+.light-theme .bg-slate-900\/50,
+.light-theme .bg-slate-950,
+.light-theme .bg-\[\#0D0E12\]\/40 {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Lists, rows, and boxes */
+.light-theme .bg-\[\#050507\]\/40,
+.light-theme .bg-\[\#050507\]\/10,
+.light-theme .bg-white\/\[0\.02\] {
+  background-color: #f1f5f9 !important; /* slate-100 */
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Text coloring overrides */
+.light-theme .text-white,
+.light-theme .text-slate-100 {
+  color: #0f172a !important; /* slate-900 */
+}
+
+.light-theme .text-slate-300,
+.light-theme .text-slate-400 {
+  color: #334155 !important; /* slate-700 */
+}
+
+.light-theme .text-slate-500 {
+  color: #64748b !important; /* slate-500 */
+}
+
+/* Border overrides */
+.light-theme .border-white\/5,
+.light-theme .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Forms, Inputs, and Select Elements */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
+}
+
+.light-theme input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Quick load keys and tabs background styling */
+.light-theme .bg-[#00E5FF]/10 {
+  background-color: rgba(0, 184, 212, 0.1) !important;
+}
+
+.light-theme .bg-white\/5.text-\[\#00E5FF\] {
+  background-color: rgba(0, 184, 212, 0.08) !important;
+  color: #00838f !important; /* Deeper Cyan-800 for contrast */
+}
+
+.light-theme .text-\[\#00E5FF\] {
+  color: #00838f !important;
+}
+
+.light-theme .hover\:bg-white\/\[0\.02\]:hover,
+.light-theme .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Ensure cyber-accent items look outstanding on light background */
+.light-theme .text-cyber-cyan {
+  color: #00838f !important;
+}
+.light-theme .text-cyber-green {
+  color: #15803d !important; /* green-700 */
+}
+.light-theme .text-cyber-yellow {
+  color: #a16207 !important; /* yellow-700 */
+}
+.light-theme .text-cyber-red {
+  color: #b91c1c !important; /* red-700 */
+}
+

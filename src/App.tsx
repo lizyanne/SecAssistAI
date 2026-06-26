@@ -60,6 +60,7 @@ import { MITRE_ATTACK_MATRIX, MitreTactic, MitreTechnique } from "./data/mitreDa
 export default function App() {
   // Theme state (dark mode is default for professional SOC vibe)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   // Authentication states
   const [token, setToken] = useState<string>(() => localStorage.getItem("secassist_token") || "");
@@ -68,6 +69,12 @@ export default function App() {
   const [password, setPassword] = useState<string>("");
   const [authError, setAuthError] = useState<string>("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  
+  // Registration States
+  const [isRegisterMode, setIsRegisterMode] = useState<boolean>(false);
+  const [registerName, setRegisterName] = useState<string>("");
+  const [registerRole, setRegisterRole] = useState<string>("Analyst");
+  const [registerTenantId, setRegisterTenantId] = useState<string>("tenant-alpha");
 
   // Active view tab
   const [activeTab, setActiveTab] = useState<
@@ -171,6 +178,7 @@ export default function App() {
 
   const fetchDashboardData = async () => {
     if (!token) return;
+    setIsRefreshing(true);
     try {
       // Get Stats
       const statsRes = await fetch("/api/dashboard/stats", {
@@ -232,8 +240,12 @@ export default function App() {
         setMitreMatrix(mitreData);
       }
       setIsLoadingMitre(false);
+      addConsoleLog("SOC Live telemetry feeds and event matrices successfully refreshed.");
     } catch (err) {
       console.error("Failed to load dashboard data telemetry:", err);
+      addConsoleLog("Failed to sync live telemetry from database container.");
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -254,6 +266,37 @@ export default function App() {
         addConsoleLog(`Successful tenant login for user: ${email}`);
       } else {
         setAuthError(data.error || "Authentication failed.");
+      }
+    } catch (err) {
+      setAuthError("Server unavailable.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setAuthError("");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          name: registerName, 
+          email, 
+          role: registerRole, 
+          tenantId: registerTenantId, 
+          password 
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setToken(data.token);
+        setCurrentUser(data.user);
+        addConsoleLog(`Successfully registered and authenticated new user profile: ${email} (${registerRole})`);
+      } else {
+        setAuthError(data.error || "Registration failed.");
       }
     } catch (err) {
       setAuthError("Server unavailable.");
@@ -655,38 +698,63 @@ export default function App() {
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6 text-xs text-slate-300 font-sans leading-relaxed">
-            <span className="font-bold block text-white mb-1">Enterprise Demo Credentials</span>
-            Select an identity profile from the quick-load keys below to assess multi-tenant and role-based privilege controls.
-          </div>
+          {isRegisterMode ? (
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6 text-xs text-slate-300 font-sans leading-relaxed">
+              <span className="font-bold block text-white mb-1">Create Identity Profile & Access Key</span>
+              Define a new analyst profile, assign system role privileges, and map them to a tenant container segment.
+            </div>
+          ) : (
+            <>
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6 text-xs text-slate-300 font-sans leading-relaxed">
+                <span className="font-bold block text-white mb-1">Enterprise Demo Credentials</span>
+                Select an identity profile from the quick-load keys below to assess multi-tenant and role-based privilege controls.
+              </div>
 
-          <div className="flex gap-2 flex-wrap mb-6">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("admin@secassist.ai")}
-              className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-red/10 hover:bg-cyber-red/20 border border-cyber-red/20 text-cyber-red font-mono font-bold transition-all duration-150 cursor-pointer"
-            >
-              Sarah (Admin)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("analyst@secassist.ai")}
-              className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-yellow/10 hover:bg-cyber-yellow/20 border border-cyber-yellow/20 text-cyber-yellow font-mono font-bold transition-all duration-150 cursor-pointer"
-            >
-              John (Analyst)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("viewer@secassist.ai")}
-              className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/20 text-cyber-cyan font-mono font-bold transition-all duration-150 cursor-pointer"
-            >
-              Marcus (Viewer)
-            </button>
-          </div>
+              <div className="flex gap-2 flex-wrap mb-6">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin("admin@secassist.ai")}
+                  className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-red/10 hover:bg-cyber-red/20 border border-cyber-red/20 text-cyber-red font-mono font-bold transition-all duration-150 cursor-pointer"
+                >
+                  Sarah (Admin)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin("analyst@secassist.ai")}
+                  className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-yellow/10 hover:bg-cyber-yellow/20 border border-cyber-yellow/20 text-cyber-yellow font-mono font-bold transition-all duration-150 cursor-pointer"
+                >
+                  John (Analyst)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin("viewer@secassist.ai")}
+                  className="text-[11px] px-3 py-1.5 rounded-lg bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/20 text-cyber-cyan font-mono font-bold transition-all duration-150 cursor-pointer"
+                >
+                  Marcus (Viewer)
+                </button>
+              </div>
+            </>
+          )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={isRegisterMode ? handleRegister : handleLogin} className="space-y-4">
+            {isRegisterMode && (
+              <div>
+                <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">Full Display Name</label>
+                <input
+                  type="text"
+                  value={registerName}
+                  onChange={e => setRegisterName(e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white font-mono text-xs placeholder-slate-500 focus:outline-none focus:border-[#00E5FF]/50 transition-all duration-150"
+                  placeholder="Security Analyst Name"
+                />
+              </div>
+            )}
+
             <div>
-              <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">SEC_SOC Identity ID</label>
+              <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">
+                {isRegisterMode ? "Choose SEC_SOC Identity ID (Email)" : "SEC_SOC Identity ID"}
+              </label>
               <input
                 type="email"
                 value={email}
@@ -697,8 +765,38 @@ export default function App() {
               />
             </div>
 
+            {isRegisterMode && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">Access Role</label>
+                  <select
+                    value={registerRole}
+                    onChange={e => setRegisterRole(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 font-mono text-xs focus:outline-none focus:border-[#00E5FF]/50"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Analyst">Analyst</option>
+                    <option value="Viewer">Viewer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">Tenant Container</label>
+                  <select
+                    value={registerTenantId}
+                    onChange={e => setRegisterTenantId(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 font-mono text-xs focus:outline-none focus:border-[#00E5FF]/50"
+                  >
+                    <option value="tenant-alpha">tenant-alpha (ALPHA_CORP)</option>
+                    <option value="tenant-beta">tenant-beta (BETA_SYSTEMS)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">Access Token Key</label>
+              <label className="block text-[10px] font-mono mb-1.5 text-slate-400 uppercase tracking-wider">
+                {isRegisterMode ? "Choose Access Token Key" : "Access Token Key"}
+              </label>
               <input
                 type="password"
                 value={password}
@@ -724,16 +822,29 @@ export default function App() {
               {isLoggingIn ? (
                 <>
                   <RefreshCw className="animate-spin" size={14} />
-                  SEC_SOC Authorizing...
+                  {isRegisterMode ? "SEC_SOC Registering..." : "SEC_SOC Authorizing..."}
                 </>
               ) : (
                 <>
                   <Lock size={14} />
-                  Authorize Session
+                  {isRegisterMode ? "Register & Authorize" : "Authorize Session"}
                 </>
               )}
             </button>
           </form>
+
+          <div className="mt-5 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegisterMode(!isRegisterMode);
+                setAuthError("");
+              }}
+              className="text-xs text-[#00E5FF] hover:underline font-mono"
+            >
+              {isRegisterMode ? "← Back to Login Credentials" : "Create New Identity ID & Access Key →"}
+            </button>
+          </div>
 
           <div className="mt-8 pt-4 border-t border-white/5 text-center">
             <span className="text-[10px] text-slate-500 font-mono uppercase tracking-widest block">Enterprise Grade Protected Workspace</span>
@@ -744,7 +855,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#050507] text-[#D1D5DB] relative overflow-hidden">
+    <div className={`min-h-screen flex flex-col font-sans relative overflow-hidden transition-all duration-300 ${isDarkMode ? "bg-[#050507] text-[#D1D5DB]" : "bg-slate-50 text-slate-800 light-theme"}`}>
       {/* Background Ambient Glows */}
       <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-[#00E5FF]/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-[#FF3D00]/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -792,18 +903,22 @@ export default function App() {
 
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:border-[#00E5FF]/30 transition-all duration-150 cursor-pointer"
-              title="Toggle view filter mode"
+              onClick={() => {
+                setIsDarkMode(!isDarkMode);
+                addConsoleLog(`Theme switched to: ${!isDarkMode ? "Dark Mode (Default)" : "Light Mode (High Contrast)"}`);
+              }}
+              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-[#00E5FF] hover:border-[#00E5FF]/30 transition-all duration-150 cursor-pointer"
+              title="Toggle view theme mode"
             >
-              {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+              {isDarkMode ? <Sun size={14} className="text-yellow-400" /> : <Moon size={14} className="text-indigo-600" />}
             </button>
             <button
               onClick={() => fetchDashboardData()}
-              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-cyber-cyan hover:border-[#00E5FF]/30 transition-all duration-150 cursor-pointer"
+              disabled={isRefreshing}
+              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-[#00E5FF] hover:border-[#00E5FF]/30 transition-all duration-150 cursor-pointer disabled:opacity-50"
               title="Refresh telemetry"
             >
-              <RefreshCw size={14} />
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin text-[#00E5FF]" : ""} />
             </button>
             <button
               onClick={handleLogout}
@@ -820,8 +935,8 @@ export default function App() {
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative z-10">
         
         {/* Workspace Side rail navigation */}
-        <aside className="w-full md:w-64 flex flex-col justify-between border-r border-white/5 bg-[#0A0A0C]/80 backdrop-blur-lg transition-all duration-200 z-10">
-          <div className="p-4 space-y-1.5">
+        <aside className="w-full md:w-64 md:h-[calc(100vh-64px)] md:sticky md:top-16 flex flex-col justify-between border-r border-white/5 bg-[#0A0A0C]/80 backdrop-blur-lg transition-all duration-200 z-10">
+          <div className="flex-1 overflow-y-auto p-4 space-y-1.5 custom-scrollbar">
             <span className="text-[10px] font-mono text-slate-500 tracking-widest uppercase block mb-3 px-3">SOC WORKSPACE</span>
             
             <button

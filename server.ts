@@ -394,6 +394,39 @@ app.post("/api/auth/login", async (req, res) => {
   });
 });
 
+// Register a new user profile
+app.post("/api/auth/register", async (req, res) => {
+  const { name, email, role, tenantId, password } = req.body;
+  if (!email || !name) {
+    return res.status(400).json({ error: "Name and email are required." });
+  }
+
+  try {
+    const existingUser = await DatabaseService.getUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ error: "Identity ID already registered." });
+    }
+
+    const newUser = await DatabaseService.createUser({
+      name,
+      email,
+      role: role || "Analyst",
+      tenantId: tenantId || "tenant-alpha"
+    });
+
+    // Create token replica
+    const tokenPayload = { email: newUser.email, role: newUser.role, tenantId: newUser.tenantId };
+    const mockToken = Buffer.from(JSON.stringify(tokenPayload)).toString("base64");
+
+    return res.json({
+      token: mockToken,
+      user: newUser
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to register new identity ID.", details: err.message });
+  }
+});
+
 // Fetch current user details
 app.get("/api/auth/me", async (req, res) => {
   const user = await getAuthUser(req);
